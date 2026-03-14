@@ -1,0 +1,135 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <fstream>
+#include <cctype>
+
+using namespace std;
+
+// Convert string to lowercase and remove spaces/punctuation
+string normalize(const string& str) {
+    string result;
+    for (char c : str) {
+        if (isalnum(static_cast<unsigned char>(c))) {
+            result += tolower(static_cast<unsigned char>(c));
+        }
+    }
+    return result;
+}
+
+// Compute similarity percentage between two strings (normalized)
+double similarityPercentage(const string& s1, const string& s2) {
+    string str1 = normalize(s1);
+    string str2 = normalize(s2);
+
+    const size_t len1 = str1.size();
+    const size_t len2 = str2.size();
+
+    if (len1 == 0 && len2 == 0) return 100.0;
+    if (len1 == 0 || len2 == 0) return 0.0;
+
+    vector<vector<int>> dp(len1 + 1, vector<int>(len2 + 1));
+
+    for (size_t i = 0; i <= len1; ++i) dp[i][0] = i;
+    for (size_t j = 0; j <= len2; ++j) dp[0][j] = j;
+
+    for (size_t i = 1; i <= len1; ++i) {
+        for (size_t j = 1; j <= len2; ++j) {
+            dp[i][j] = min({
+                dp[i - 1][j] + 1,
+                dp[i][j - 1] + 1,
+                dp[i - 1][j - 1] + (str1[i - 1] == str2[j - 1] ? 0 : 1)
+            });
+        }
+    }
+
+    int maxLen = max(len1, len2);
+    return 100.0 - (static_cast<double>(dp[len1][len2]) / maxLen * 100.0);
+}
+
+int main(int argc, char* argv[]) {
+    string answersFileName;
+    cout << endl;
+
+    if (argc > 1) answersFileName = argv[1];
+    else {
+        cout << "Script File: ";
+        getline(cin, answersFileName);
+        cout << endl;
+    }
+
+    ifstream answersFile(answersFileName);
+    if (!answersFile) {
+        cerr << "Error opening answers file." << endl;
+        return 1;
+    }
+
+    vector<string> answers;
+    string line;
+    while (getline(answersFile, line)) answers.push_back(line);
+    answersFile.close();
+
+    string userAnswer;
+    int questionNumber = 0;
+    bool showHint = true; // toggle for showing menu options
+
+    while (questionNumber < (int)answers.size() && questionNumber >= 0) {
+        cout << "\033[37mLine " << questionNumber + 1 << "\n\n> ";
+        getline(cin, userAnswer);
+        cout << endl;
+
+        string lowerInput = normalize(userAnswer);
+
+        // Toggle hint display
+        if (lowerInput == "h") {
+            showHint = !showHint;
+            cout << (showHint ? "Help is now on.\n\n" : "Help is now off.\n\n");
+            continue;
+        }
+
+        // Display current answer (without affecting question)
+        if (lowerInput == "d") {
+            cout << "\033[36mCurrent answer: " << answers[questionNumber] << "\033[0m\n\n";
+            continue; // allow user to still type the answer afterward
+        }
+
+        // Navigation commands
+        if (userAnswer.empty() || lowerInput == "n") { // empty or 'n' → next
+            questionNumber++;
+            continue;
+        } else if (lowerInput == "p") { // previous
+            questionNumber--;
+            if (questionNumber < 0) questionNumber = 0;
+            continue;
+        } else if (lowerInput == "s") { // start over
+            questionNumber = 0;
+            continue;
+        } else if (lowerInput == "q") { // quit
+            cout << "Exiting quiz.\n";
+            break;
+        }
+
+        // Check answer
+        double similarity = similarityPercentage(userAnswer, answers[questionNumber]);
+        if (similarity > 50) {
+            cout << "\033[0m" << answers[questionNumber] << "\nCorrect! (" << similarity << "%)\n\n";
+            questionNumber++;
+        } else {
+            cout << "\033[31mThe answer was (" << similarity << "%): \n" << answers[questionNumber] << "\n\n\033[0m";
+            if (showHint)
+                cout << "Press Enter or 'n' for next, 'p' for previous, 's' to start over, 'q' to quit, 'h' to toggle help, 'd' to display answer, or try again.\033[37m\n\n";
+        }
+
+        // Show navigation hint at empty input or after correct answer if enabled
+        if (showHint && (userAnswer.empty() || similarity > 67)) {
+            cout << "Navigation: Enter/n = next, p = previous, s = start over, q = quit, h = toggle help, d = display answer\n\n";
+        }
+    }
+
+    if (questionNumber >= (int)answers.size()) {
+        cout << "You remembered everything!\n";
+    }
+
+    return 0;
+}
