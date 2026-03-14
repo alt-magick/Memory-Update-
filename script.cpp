@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <fstream>
 #include <cctype>
+#include <limits>
 
 using namespace std;
 
@@ -73,9 +74,11 @@ int main(int argc, char* argv[]) {
     string userAnswer;
     int questionNumber = 0;
     bool showHint = true; // toggle for showing menu options
+    double fuzzySuccessPercentage = 50.0; // default threshold
 
     while (questionNumber < (int)answers.size() && questionNumber >= 0) {
-        cout << "\033[37mLine " << questionNumber + 1 << "\n\n> ";
+        cout << "\033[37mLine " << questionNumber + 1
+             << "%)\n\n> ";
         getline(cin, userAnswer);
         cout << endl;
 
@@ -91,7 +94,23 @@ int main(int argc, char* argv[]) {
         // Display current answer (without affecting question)
         if (lowerInput == "d") {
             cout << "\033[36mCurrent answer: " << answers[questionNumber] << "\033[0m\n\n";
-            continue; // allow user to still type the answer afterward
+            continue;
+        }
+
+        // Change fuzzy success percentage
+        if (lowerInput == "f") {
+            double newPercentage;
+            cout << "Enter new fuzzy success percentage (0-100, current "
+                 << fuzzySuccessPercentage << "%): ";
+            cin >> newPercentage;
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // clear input buffer
+            if (newPercentage >= 0 && newPercentage <= 100) {
+                fuzzySuccessPercentage = newPercentage;
+                cout << "Fuzzy success percentage updated to " << fuzzySuccessPercentage << "%\n\n";
+            } else {
+                cout << "Invalid value. Must be 0-100.\n\n";
+            }
+            continue;
         }
 
         // Navigation commands
@@ -112,18 +131,23 @@ int main(int argc, char* argv[]) {
 
         // Check answer
         double similarity = similarityPercentage(userAnswer, answers[questionNumber]);
-        if (similarity > 50) {
-            cout << "\033[0m" << answers[questionNumber] << "\nCorrect! (" << similarity << "%)\n\n";
+        if (similarity >= fuzzySuccessPercentage) {
+            cout << "\033[0m" << answers[questionNumber]
+                 << "\nCorrect! (" << similarity << "%)\n\n";
             questionNumber++;
         } else {
-            cout << "\033[31mThe answer was (" << similarity << "%): \n" << answers[questionNumber] << "\n\n\033[0m";
+            cout << "\033[31mThe answer was (" << similarity << "%): \n"
+                 << answers[questionNumber] << "\n\n\033[0m";
             if (showHint)
-                cout << "Press Enter or 'n' for next, 'p' for previous, 's' to start over, 'q' to quit, 'h' to toggle help, 'd' to display answer, or try again.\033[37m\n\n";
+                cout << "Press Enter or 'n' for next, 'p' for previous, 's' to start over, "
+                     << "'q' to quit, 'h' to toggle help, 'd' to display answer, "
+                     << "'f' to change fuzzy threshold, or try again.\033[37m\n\n";
         }
 
         // Show navigation hint at empty input or after correct answer if enabled
-        if (showHint && (userAnswer.empty() || similarity > 67)) {
-            cout << "Navigation: Enter/n = next, p = previous, s = start over, q = quit, h = toggle help, d = display answer\n\n";
+        if (showHint && (userAnswer.empty() || similarity >= fuzzySuccessPercentage)) {
+            cout << "Navigation: Enter/n = next, p = previous, s = start over, "
+                 << "q = quit, h = toggle help, d = display answer, f = change fuzzy threshold\n\n";
         }
     }
 
