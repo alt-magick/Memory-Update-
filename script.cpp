@@ -49,6 +49,15 @@ double similarityPercentage(const string& s1, const string& s2) {
     return 100.0 - (static_cast<double>(dp[len1][len2]) / maxLen * 100.0);
 }
 
+// Function to clear screen
+void clearScreen() {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
 int main(int argc, char* argv[]) {
     string answersFileName;
     cout << endl;
@@ -77,10 +86,11 @@ int main(int argc, char* argv[]) {
     double fuzzySuccessPercentage = 50.0; // default threshold
 
     while (questionNumber < (int)answers.size() && questionNumber >= 0) {
-        cout << "\033[37mLine " << questionNumber + 1
-             << "\n\n> ";
+        cout << "\033[37mLine " << questionNumber + 1 << "\n\n> "; // show current line number above prompt
         getline(cin, userAnswer);
-        cout << endl;
+
+        // Clear screen immediately after input, before any output
+        clearScreen();
 
         string lowerInput = normalize(userAnswer);
 
@@ -94,16 +104,6 @@ int main(int argc, char* argv[]) {
         // Display current answer (without affecting question)
         if (lowerInput == "d") {
             cout << "\033[36mCurrent answer: \n\n" << answers[questionNumber] << "\033[0m\n\n";
-            continue;
-        }
-
-        // Clear screen option
-        if (lowerInput == "c") {
-            #ifdef _WIN32
-                system("cls");
-            #else
-                system("clear");
-            #endif
             continue;
         }
 
@@ -151,13 +151,13 @@ int main(int argc, char* argv[]) {
             if (showHint)
                 cout << "Press Enter or 'n' for next, 'p' for previous, 's' to start over, "
                      << "'q' to quit, 'h' to toggle help, 'd' to display answer, "
-                     << "'f' to change fuzzy threshold, 'c' to clear screen, or try again.\033[37m\n\n";
+                     << "'f' to change fuzzy threshold, or try again.\033[37m\n\n";
         }
 
         // Show navigation hint at empty input or after correct answer if enabled
         if (showHint && (userAnswer.empty() || similarity >= fuzzySuccessPercentage)) {
             cout << "Navigation: Enter/n = next, p = previous, s = start over, "
-                 << "q = quit, h = toggle help, d = display answer, f = change fuzzy threshold, c = clear screen\n\n";
+                 << "q = quit, h = toggle help, d = display answer, f = change fuzzy threshold\n\n";
         }
     }
 
