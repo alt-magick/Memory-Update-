@@ -8,6 +8,7 @@ Enter, or 'n' for next, </br>
 's' start over, </br>
 'd' display answer,</br>
 'r' random jump,</br>
+'j' jump to question,</br>
 'h' toggle help, </br>
 'q' quit, </br>
 'f' set fuzzy percentage,</br>
