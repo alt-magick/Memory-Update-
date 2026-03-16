@@ -64,6 +64,8 @@ void displayHelp(bool showHint) {
 }
 
 int main(int argc, char* argv[]) {
+    clearScreen();
+    
     string answersFileName;
 
     if (argc > 1) answersFileName = argv[1];
