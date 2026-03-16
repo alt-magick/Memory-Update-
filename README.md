@@ -7,8 +7,9 @@ Enter, or 'n' for next, </br>
 'p' for previous, </br>
 's' to start over, </br>
 'd' to display answer,</br>
-'q' to quit, </br>
+'r' to jump to a random question,</br>
 'h' to toggle help, </br>
+'q' to quit, </br>
 'f' to set fuzzy percentage,</br>
 Or enter an answer to try again.
 
