@@ -9,7 +9,7 @@ The menu has these options:
 Navigation:
                    
     n/Enter - next
-    p       - prev
+    p       - previous
     s       - start
     r       - random
 
@@ -20,7 +20,7 @@ Actions:
     v - skip memorized questions
     j - jump to question
     f - fuzzy %
-    t - statisticss
+    t - statistics
     c - clear
 
 Other:
