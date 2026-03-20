@@ -33,16 +33,12 @@ string normalize(const string& str) {
 double similarityPercentage(const string& s1, const string& s2) {
     string str1 = normalize(s1);
     string str2 = normalize(s2);
-
     size_t len1 = str1.size(), len2 = str2.size();
     if (len1 == 0 && len2 == 0) return 100.0;
     if (len1 == 0 || len2 == 0) return 0.0;
-
     vector<vector<int>> dp(len1 + 1, vector<int>(len2 + 1));
-
     for (size_t i = 0; i <= len1; i++) dp[i][0] = i;
     for (size_t j = 0; j <= len2; j++) dp[0][j] = j;
-
     for (size_t i = 1; i <= len1; i++) {
         for (size_t j = 1; j <= len2; j++) {
             dp[i][j] = min({
@@ -52,7 +48,6 @@ double similarityPercentage(const string& s1, const string& s2) {
             });
         }
     }
-
     int maxLen = max(len1, len2);
     return 100.0 - (double)dp[len1][len2] / maxLen * 100.0;
 }
@@ -74,13 +69,10 @@ void waitForKey() {
     termios oldt, newt;
     tcgetattr(STDIN_FILENO, &oldt);
     newt = oldt;
-
     newt.c_lflag &= ~(ICANON | ECHO);
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-
     int ch = getchar(); // store result to avoid warning
     (void)ch;
-
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 #endif
 }
@@ -88,32 +80,26 @@ void waitForKey() {
 // Compact help
 void showHelpScreen() {
     clearScreen();
-
     cout << "\033[37m=== HELP ===\n\n";
-
     cout << "Navigation:\n\n";
     cout << " n/Enter - next\n";
     cout << " p       - previous\n";
     cout << " s       - start\n";
     cout << " r       - random\n\n";
-
     cout << "Actions:\n\n";
     cout << " d - show answer\n";
     cout << " m - mark as memorized\n";
     cout << " v - skip memorized questions\n";
     cout << " j - jump to question\n";
     cout << " f - fuzzy %\n";
-    cout << " t - statisticss\n";
+    cout << " t - statistics\n";
     cout << " c - clear\n\n";
-
     cout << "Other:\n\n";
     cout << " h - help\n";
     cout << " q - quit\n";
-
     cout << "\nPress any key...\033[0m";
-
     waitForKey();
-    clearScreen(); // clean return
+    clearScreen();
 }
 
 // Stats
@@ -125,23 +111,18 @@ void displayStatistics(const vector<bool>& memorized,
                        const vector<bool>& wrongAnswers) {
     int total = memorized.size() / 2;
     int mem = 0, correct = 0, wrong = 0;
-
     for (size_t i = 0; i < memorized.size(); i += 2) {
         if (memorized[i]) mem++;
         if (correctAnswers[i]) correct++;
         if (wrongAnswers[i]) wrong++;
     }
-
     int answered = correct + wrong;
     int remainingDeck = 0;
-
     for (size_t i = deckIndex; i < randomDeck.size(); i++) {
         if (!memorized[randomDeck[i]]) remainingDeck++;
     }
-
     double correctPercent = answered ? (correct * 100.0 / answered) : 0.0;
     double wrongPercent   = answered ? (wrong * 100.0 / answered) : 0.0;
-
     cout << "\033[36m--- Stats ---\n";
     cout << "Total: " << total << "\n";
     cout << "Mem: " << mem << " (" << (total ? mem * 100.0 / total : 0) << "%)\n";
@@ -181,16 +162,13 @@ int main(int argc, char* argv[]) {
     int q = 0;
     bool skipMode = false;
     double fuzzy = 50.0;
-
     vector<int> deck;
     int deckIndex = 0;
-
     string input;
 
     cout << "\033[0m(h for help)\n\n";
 
     while (q >= 0 && q < (int)answers.size() - 1) {
-
         if (skipMode && memorized[q]) {
             int start = q;
             do {
@@ -206,7 +184,6 @@ int main(int argc, char* argv[]) {
 
         getline(cin, input);
         clearScreen();
-
         string cmd = normalize(input);
 
         if (cmd == "h") {
@@ -264,11 +241,11 @@ int main(int argc, char* argv[]) {
             }
         }
         else {
+            // Check answer similarity but DO NOT auto-advance
             double sim = similarityPercentage(input, answers[q + 1]);
             if (sim >= fuzzy) {
                 cout << "Correct (" << sim << "%)\n\n";
                 correct[q] = true;
-                q += 2;
             } else {
                 cout << "\033[31mWrong (" << sim << "%)\n"
                      << answers[q + 1] << "\033[0m\n\n";
