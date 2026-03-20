@@ -6,7 +6,7 @@ Takes a script and lets you memorize it with fuzzy logic so exact answers aren't
 
 The menu has these options:
 ```
-Nav:
+Navigation:
                    
     n/Enter - next
     p       - prev
@@ -20,7 +20,7 @@ Actions:
     v - skip memorized questions
     j - jump to question
     f - fuzzy %
-    t - stats
+    t - statisticss
     c - clear
 
 Other:
